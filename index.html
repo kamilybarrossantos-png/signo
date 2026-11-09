@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oráculo do Zodíaco | Descubra seu Signo</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind Custom Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        mystic: {
+                            900: '#090714',
+                            800: '#120d2b',
+                            700: '#1e1642',
+                            600: '#2d2160',
+                            accent: '#d4af37', // Gold accent
+                            purple: '#9d4edd',
+                            cyan: '#48cae4'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Cinzel', 'Georgia', 'serif'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #090714;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .font-cinzel {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Celestial Canvas Background */
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-card {
+            background: rgba(18, 13, 43, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(157, 78, 221, 0.15);
+        }
+
+        .glass-card-glow {
+            box-shadow: 0 0 35px rgba(157, 78, 221, 0.3), 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+
+        /* Golden Gradient Text */
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #FFF5C0 0%, #D4AF37 50%, #AA7C11 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .mystic-gradient-text {
+            background: linear-gradient(135deg, #e0aaff 0%, #c77dff 40%, #7b2cbf 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom Glow Animations */
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                opacity: 0.4;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+        }
+
+        .pulsing-orb {
+            animation: pulseGlow 8s infinite ease-in-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #090714;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2d2160;
+            border-radius: 4px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9d4edd;
+        }
+
+        /* Tab Transition */
+        .page-section {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+
+        .page-hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            visibility: hidden;
+        }
+
+        .page-visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+            position: relative;
+            visibility: visible;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col justify-between selection:bg-purple-600 selection:text-white">
+
+    <!-- Canvas para estrelas animadas -->
+    <canvas id="starfield"></canvas>
+
+    <!-- Orbes místicas decorativas ao fundo -->
+    <div
+        class="fixed top-1/4 -left-20 w-96 h-96 bg-purple-900/30 rounded-full blur-3xl pulsing-orb pointer-events-none">
+    </div>
+    <div class="fixed bottom-10 -right-20 w-96 h-96 bg-indigo-900/30 rounded-full blur-3xl pulsing-orb pointer-events-none"
+        style="animation-delay: 4s;"></div>
+
+    <!-- Header Astral -->
+    <header class="w-full py-6 px-4 border-b border-mystic-accent/10 glass-card sticky top-0 z-40 backdrop-blur-md">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="goToHome()">
+                <div
+                    class="w-10 h-10 rounded-full bg-gradient-to-tr from-mystic-accent to-purple-600 p-[1px] flex items-center justify-center shadow-lg shadow-purple-900/50">
+                    <div class="w-full h-full bg-mystic-900 rounded-full flex items-center justify-center">
+                        <svg class="w-5 h-5 text-mystic-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="font-cinzel text-xl font-bold tracking-wider gold-gradient-text">ORÁCULO ZODIACAL</h1>
+                    <p class="text-[10px] text-purple-300/70 tracking-widest uppercase">Astrologia & Sabedoria Celestial
+                    </p>
+                </div>
+            </div>
+
+            <!-- Botão de Som Místico -->
+            <button id="audio-toggle" onclick="toggleAudio()"
+                class="p-2 rounded-full border border-mystic-accent/30 bg-mystic-800/50 hover:bg-mystic-700/60 text-mystic-accent transition-all flex items-center gap-2 text-xs px-3">
+                <svg id="audio-icon-off" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                </svg>
+                <svg id="audio-icon-on" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                </svg>
+                <span class="hidden sm:inline" id="audio-status-text">Som Cosmic: Off</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="max-w-4xl mx-auto px-4 py-8 w-full flex-grow relative z-10">
+
+        <!-- ================= SEÇÃO 1: FORMULÁRIO DE ENTRADA ================= -->
+        <section id="form-section" class="page-section page-visible flex flex-col items-center">
+
+            <div class="text-center mb-10 max-w-2xl">
+                <div
+                    class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-950/40 text-purple-300 text-xs font-medium mb-4 backdrop-blur-sm">
+                    <span class="w-2 h-2 rounded-full bg-mystic-accent animate-ping"></span>
+                    Alinhamento Astral dos Astros
+                </div>
+                <h2 class="font-cinzel text-3xl sm:text-5xl font-bold mb-4 tracking-tight gold-gradient-text">
+                    Descubra o Seu Signo Zodiacal
+                </h2>
+                <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                    Insira sua data de nascimento para desvelar a influência dos astros no seu nascimento, seu elemento
+                    regente, traços de personalidade e mistérios do seu signo.
+                </p>
+            </div>
+
+            <!-- Card do Formulário -->
+            <div class="w-full max-w-lg glass-card rounded-2xl p-6 sm:p-10 glass-card-glow relative overflow-hidden">
+                <!-- Borda Superior Dourada -->
+                <div
+                    class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-mystic-accent to-transparent">
+                </div>
+
+                <!-- Seletor de Modo de Entrada (Data Completa ou Dia/Mês) -->
+                <div class="flex border-b border-purple-900/60 mb-6">
+                    <button id="mode-btn-full" onclick="switchInputMode('full')"
+                        class="flex-1 py-2 text-center text-sm font-semibold border-b-2 border-mystic-accent text-mystic-accent transition-all">
+                        Data Completa
+                    </button>
+                    <button id="mode-btn-daymonth" onclick="switchInputMode('daymonth')"
+                        class="flex-1 py-2 text-center text-sm font-semibold border-b-2 border-transparent text-purple-300/60 hover:text-purple-200 transition-all">
+                        Apenas Dia & Mês
+                    </button>
+                </div>
+
+                <form id="zodiac-form" onsubmit="handleFormSubmit(event)" class="space-y-6">
+
+                    <!-- Opção 1: Data Completa -->
+                    <div id="input-container-full" class="space-y-2">
+                        <label for="birth-date"
+                            class="block text-xs font-semibold uppercase tracking-wider text-purple-200">
+                            Data de Nascimento
+                        </label>
+                        <div class="relative">
+                            <input type="date" id="birth-date" required
+                                class="w-full bg-mystic-900/80 border border-purple-500/30 rounded-xl px-4 py-3.5 text-white placeholder-purple-400 focus:outline-none focus:border-mystic-accent focus:ring-1 focus:ring-mystic-accent transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Opção 2: Dia e Mês Separados (Oculto por padrão) -->
+                    <div id="input-container-daymonth" class="hidden grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label for="birth-day"
+                                class="block text-xs font-semibold uppercase tracking-wider text-purple-200">
+                                Dia
+                            </label>
+                            <select id="birth-day"
+                                class="w-full bg-mystic-900/80 border border-purple-500/30 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-mystic-accent focus:ring-1 focus:ring-mystic-accent transition-all">
+                                <!-- Preenchido via JS -->
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="birth-month"
+                                class="block text-xs font-semibold uppercase tracking-wider text-purple-200">
+                                Mês
+                            </label>
+                            <select id="birth-month"
+                                class="w-full bg-mystic-900/80 border border-purple-500/30 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-mystic-accent focus:ring-1 focus:ring-mystic-accent transition-all">
+                                <option value="1">Janeiro (01)</option>
+                                <option value="2">Fevereiro (02)</option>
+                                <option value="3">Março (03)</option>
+                                <option value="4">Abril (04)</option>
+                                <option value="5">Maio (05)</option>
+                                <option value="6">Junho (06)</option>
+                                <option value="7">Julho (07)</option>
+                                <option value="8">Agosto (08)</option>
+                                <option value="9">Setembro (09)</option>
+                                <option value="10">Outubro (10)</option>
+                                <option value="11">Novembro (11)</option>
+                                <option value="12">Dezembro (12)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Mensagem de Alerta/Erro Interno (Sem Alert) -->
+                    <div id="form-error"
+                        class="hidden p-3 rounded-lg bg-red-900/40 border border-red-500/50 text-red-200 text-xs text-center">
+                        Por favor, selecione uma data válida para consulta.
+                    </div>
+
+                    <!-- Botão Estilizado Místico -->
+                    <button type="submit"
+                        class="w-full py-4 rounded-xl bg-gradient-to-r from-purple-700 via-mystic-600 to-indigo-800 hover:from-purple-600 hover:to-indigo-700 text-white font-cinzel font-bold tracking-widest uppercase border border-mystic-accent/40 shadow-lg shadow-purple-900/40 hover:shadow-mystic-accent/20 hover:border-mystic-accent transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 group">
+                        <span>Revelar Meu Signo</span>
+                        <svg class="w-5 h-5 text-mystic-accent group-hover:translate-x-1 transition-transform"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </button>
+
+                </form>
+
+                <!-- Atalhos rápidos de Signos -->
+                <div class="mt-8 pt-6 border-t border-purple-900/50 text-center">
+                    <p class="text-xs text-purple-300/60 mb-3 uppercase tracking-wider">Ou consulte diretamente um
+                        signo:</p>
+                    <div class="flex flex-wrap justify-center gap-2" id="quick-sign-buttons">
+                        <!-- Gerado por JS -->
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ================= SEÇÃO 2: RESULTADO DO SIGNO ================= -->
+        <section id="result-section" class="page-section page-hidden">
+
+            <!-- Botão Voltar -->
+            <button onclick="goToHome()"
+                class="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl glass-card border border-mystic-accent/30 text-purple-200 hover:text-mystic-accent hover:border-mystic-accent transition-all text-sm group">
+                <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span>Consultar Outra Data</span>
+            </button>
+
+            <!-- Card de Resultado Principal -->
+            <div class="glass-card rounded-3xl overflow-hidden glass-card-glow border border-mystic-accent/30">
+
+                <!-- Hero do Signo -->
+                <div id="sign-hero-bg"
+                    class="p-8 sm:p-12 relative overflow-hidden bg-gradient-to-b from-purple-900/50 via-mystic-800/80 to-mystic-900 flex flex-col md:flex-row items-center justify-between gap-8 border-b border-mystic-accent/20">
+                    <!-- Brilho de fundo com a cor do elemento -->
+                    <div id="element-glow"
+                        class="absolute -top-24 -right-24 w-80 h-80 rounded-full blur-3xl opacity-30 pointer-events-none">
+                    </div>
+
+                    <div class="text-center md:text-left z-10 space-y-3">
+                        <div
+                            class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-mystic-accent/30 bg-black/40 text-mystic-accent text-xs tracking-wider uppercase">
+                            <span id="res-element-icon">🔥</span>
+                            <span id="res-element-name">Elemento Fogo</span>
+                        </div>
+                        <h2 id="res-sign-name"
+                            class="font-cinzel text-4xl sm:text-6xl font-black gold-gradient-text tracking-wide">
+                            ÁRIES
+                        </h2>
+                        <p id="res-tagline" class="text-purple-200 italic text-base sm:text-lg">
+                            "O Pioneiro Destemido do Zodíaco"
+                        </p>
+                        <div
+                            class="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs text-purple-300 pt-2">
+                            <span
+                                class="flex items-center gap-1.5 bg-mystic-900/60 px-3 py-1.5 rounded-lg border border-purple-800/50">
+                                <svg class="w-4 h-4 text-mystic-accent" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span id="res-dates">21 de Março a 19 de Abril</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Ícone Místico do Signo -->
+                    <div class="relative flex-shrink-0">
+                        <div
+                            class="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-gradient-to-tr from-mystic-accent/40 via-purple-600/30 to-mystic-900 p-1 flex items-center justify-center shadow-2xl relative">
+                            <div
+                                class="w-full h-full bg-mystic-900 rounded-full flex flex-col items-center justify-center border border-mystic-accent/30 text-center p-2">
+                                <span id="res-symbol-glyph"
+                                    class="text-6xl sm:text-7xl text-mystic-accent drop-shadow-[0_0_15px_rgba(212,175,55,0.5)]">♈</span>
+                                <span id="res-constellation-name"
+                                    class="text-[10px] font-cinzel text-purple-300 tracking-widest uppercase mt-1">Aries</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Atributos Chave do Signo -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6 bg-mystic-950/60 border-b border-purple-900/40">
+                    <div class="p-4 rounded-xl bg-mystic-900/50 border border-purple-800/30 text-center">
+                        <span class="text-xs text-purple-400 uppercase tracking-wider block mb-1">Planeta Regente</span>
+                        <span id="res-planet"
+                            class="font-cinzel text-sm sm:text-base font-bold text-slate-100">Marte</span>
+                    </div>
+                    <div class="p-4 rounded-xl bg-mystic-900/50 border border-purple-800/30 text-center">
+                        <span class="text-xs text-purple-400 uppercase tracking-wider block mb-1">Cor da Sorte</span>
+                        <span id="res-color"
+                            class="font-cinzel text-sm sm:text-base font-bold text-slate-100">Vermelho</span>
+                    </div>
+                    <div class="p-4 rounded-xl bg-mystic-900/50 border border-purple-800/30 text-center">
+                        <span class="text-xs text-purple-400 uppercase tracking-wider block mb-1">Pedra do Signo</span>
+                        <span id="res-stone"
+                            class="font-cinzel text-sm sm:text-base font-bold text-slate-100">Diamante</span>
+                    </div>
+                    <div class="p-4 rounded-xl bg-mystic-900/50 border border-purple-800/30 text-center">
+                        <span class="text-xs text-purple-400 uppercase tracking-wider block mb-1">Polaridade</span>
+                        <span id="res-polarity"
+                            class="font-cinzel text-sm sm:text-base font-bold text-slate-100">Masculina / Ativa</span>
+                    </div>
+                </div>
+
+                <!-- Conteúdo Detalhado (Abas / Seções) -->
+                <div class="p-6 sm:p-10 space-y-8">
+
+                    <!-- Descrição da Personalidade -->
+                    <div class="space-y-3">
+                        <h3 class="font-cinzel text-xl font-bold text-mystic-accent flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            Essência & Personalidade
+                        </h3>
+                        <p id="res-description" class="text-slate-300 leading-relaxed text-sm sm:text-base">
+                            Áries é o primeiro signo do zodíaco, simbolizando o início de tudo, a coragem e a força
+                            impulsiva da vida. Nascidos sob este signo são conhecidos por sua energia inabalável,
+                            espírito pioneiro e liderança natural.
+                        </p>
+                    </div>
+
+                    <!-- Qualidades & Desafios Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Virtudes -->
+                        <div class="p-5 rounded-2xl bg-emerald-950/20 border border-emerald-500/20 space-y-3">
+                            <h4 class="font-cinzel text-base font-semibold text-emerald-400 flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Pontos Fortes & Virtudes
+                            </h4>
+                            <ul id="res-strengths" class="space-y-2 text-sm text-slate-300">
+                                <!-- JS Injetado -->
+                            </ul>
+                        </div>
+
+                        <!-- Desafios -->
+                        <div class="p-5 rounded-2xl bg-amber-950/20 border border-amber-500/20 space-y-3">
+                            <h4 class="font-cinzel text-base font-semibold text-amber-400 flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                Desafios de Aprendizado
+                            </h4>
+                            <ul id="res-weaknesses" class="space-y-2 text-sm text-slate-300">
+                                <!-- JS Injetado -->
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Compatibilidade & Mantra -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                        <div
+                            class="md:col-span-2 p-5 rounded-2xl bg-mystic-900/60 border border-purple-800/30 space-y-3">
+                            <h4 class="font-cinzel text-base font-semibold text-purple-300 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-mystic-accent" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-4.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                                Afinidade & Sincronia Zodiacal
+                            </h4>
+                            <div id="res-compatibility" class="flex flex-wrap gap-2 text-sm">
+                                <!-- JS Injetado -->
+                            </div>
+                        </div>
+
+                        <div
+                            class="p-5 rounded-2xl bg-gradient-to-br from-mystic-800/80 to-purple-950/80 border border-mystic-accent/30 space-y-2 flex flex-col justify-center text-center">
+                            <span class="text-xs font-cinzel text-mystic-accent uppercase tracking-widest">Mantra
+                                Sagrado</span>
+                            <blockquote id="res-mantra" class="italic text-sm text-purple-100 font-serif">
+                                "Eu sou a força primordial da criação."
+                            </blockquote>
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação na Tela de Resultado -->
+                    <div
+                        class="pt-6 border-t border-purple-900/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <button onclick="goToHome()"
+                            class="w-full sm:w-auto px-6 py-3 rounded-xl bg-mystic-800 hover:bg-mystic-700 text-white font-semibold text-sm border border-purple-500/30 transition-all flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span>Testar Outra Data</span>
+                        </button>
+
+                        <button onclick="copyZodiacSummary()"
+                            class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-mystic-accent to-amber-600 hover:from-amber-500 hover:to-mystic-accent text-mystic-900 font-bold text-sm transition-all shadow-lg shadow-mystic-accent/20 flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                            </svg>
+                            <span id="copy-btn-text">Copiar Resumo Astral</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer Astrológico -->
+    <footer
+        class="w-full py-6 px-4 border-t border-purple-900/40 text-center text-xs text-purple-300/50 glass-card mt-auto relative z-10">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <p>© 2026 Oráculo do Zodíaco. Conhecimento dos astros e constelações.</p>
+            <p class="text-[11px]">Desenvolvido com sabedoria ancestral & tecnologia moderna</p>
+        </div>
+    </footer>
+
+    <!-- LOGICA JAVASCRIPT -->
+    <script>
+        // ================= BANCO DE DADOS DOS 12 SIGNOS =================
+        const ZODIAC_DATA = [
+            {
+                id: 'aries',
+                name: 'Áries',
+                latinName: 'Aries',
+                symbol: '♈',
+                startMonth: 3, startDay: 21,
+                endMonth: 4, endDay: 19,
+                dates: '21 de Março a 19 de Abril',
+                element: 'Fogo',
+                elementIcon: '🔥',
+                elementColor: '#ff4d4d',
+                planet: 'Marte',
+                color: 'Vermelho & Tons Quentes',
+                stone: 'Diamante & Jaspe Vermelho',
+                polarity: 'Masculina / Yang',
+                tagline: 'O Pioneiro Destemido do Zodíaco',
+                description: 'Áries é o primeiro signo do zodíaco, simbolizando o início de um novo ciclo, a força da criação e o impulso vital. Dotados de coragem inabalável, impetuosidade e liderança natural, os arianos não temem abrir caminhos virgens e enfrentar desafios de peito aberto.',
+                strengths: ['Espírito de Liderança e Iniciativa', 'Coragem e Bravura Excepcionais', 'Honestidade Transparente', 'Entusiasmo Contagiante'],
+                weaknesses: ['Impaciência com processos lentos', 'Impulsividade nas decisões', 'Tendência a agir sem pensar'],
+                compatibility: ['Leão', 'Sagitário', 'Gêmeos', 'Libra'],
+                mantra: '"Eu sou a força primordial da ação e do recomeço."'
+            },
+            {
+                id: 'touro',
+                name: 'Touro',
+                latinName: 'Taurus',
+                symbol: '♉',
+                startMonth: 4, startDay: 20,
+                endMonth: 5, endDay: 20,
+                dates: '20 de Abril a 20 de Maio',
+                element: 'Terra',
+                elementIcon: '🌿',
+                elementColor: '#2ec4b6',
+                planet: 'Vênus',
+                color: 'Verde Esmeralda & Tons Terrosos',
+                stone: 'Esmeralda & Quartzo Rosa',
+                polarity: 'Feminina / Yin',
+                tagline: 'O Construtor de Lealdade e Estabilidade',
+                description: 'Touro é o mestre da perseverança, do conforto e da apreciação dos sentidos. Regido por Vênus, busca beleza, segurança material e harmonia emocional. Possui uma determinação inquebrantável e uma lealdade inestimável.',
+                strengths: ['Determinação e Lealdade Inabaláveis', 'Praticidade e Senso de Segurança', 'Apreciação das Coisas Belas da Vida', 'Paciência Constante'],
+                weaknesses: ['Teimosia e resistência a mudanças', 'Apego excessivo à rotina e posses', 'Ciúme ocasional'],
+                compatibility: ['Virgem', 'Capricórnio', 'Câncer', 'Escorpião'],
+                mantra: '"Eu construo com sabedoria, estabilidade e amor."'
+            },
+            {
+                id: 'gemeos',
+                name: 'Gêmeos',
+                latinName: 'Gemini',
+                symbol: '♊',
+                startMonth: 5, startDay: 21,
+                endMonth: 6, endDay: 20,
+                dates: '21 de Maio a 20 de Junho',
+                element: 'Ar',
+                elementIcon: '💨',
+                elementColor: '#ffb703',
+                planet: 'Mercúrio',
+                color: 'Amarelo Vibrante & Dourado',
+                stone: 'Ágata & Citrino',
+                polarity: 'Masculina / Yang',
+                tagline: 'O Mensageiro Curioso do Intelecto',
+                description: 'Gêmeos representa a versatilidade, a curiosidade insaciável e a arte da comunicação. Com uma mente ágil e multifacetada, os geminianos absorvem conhecimento velozmente e conectam ideias e pessoas com extremo carisma.',
+                strengths: ['Intelecto Aguçado e Adaptabilidade', 'Comunicação Eloquente e Carisma', 'Curiosidade Vibrante', 'Espírito Jovem e Versátil'],
+                weaknesses: ['Inconstância e dispersão de atenção', 'Superficialidade ocasional', 'Inquietação mental'],
+                compatibility: ['Libra', 'Aquário', 'Áries', 'Sagitário'],
+                mantra: '"Eu percebo, conecto e expresso as verdades do mundo."'
+            },
+            {
+                id: 'cancer',
+                name: 'Câncer',
+                latinName: 'Cancer',
+                symbol: '♋',
+                startMonth: 6, startDay: 21,
+                endMonth: 7, endDay: 22,
+                dates: '21 de Junho a 22 de Julho',
+                element: 'Água',
+                elementIcon: '🌊',
+                elementColor: '#48cae4',
+                planet: 'Lua',
+                color: 'Prata & Branco Perolado',
+                stone: 'Pedra da Lua & Pérola',
+                polarity: 'Feminina / Yin',
+                tagline: 'O Guardião das Emoções e da Intuição',
+                description: 'Câncer é o coração do zodíaco, intimamente conectado à intuição, ao cuidado maternal e à memória afetiva. Sensíveis e protetores, os cancerianos criam laços profundos e possuem um instinto natural para acolher e nutrir.',
+                strengths: ['Empatia e Intuição Profundas', 'Lealdade e Instinto Protetor', 'Imaginação Rica e Sensibilidade', 'Capacidade Acolhedora'],
+                weaknesses: ['Hipersensibilidade e oscilação de humor', 'Apego ao passado', 'Tendência a se fechar em sua casca'],
+                compatibility: ['Escorpião', 'Peixes', 'Touro', 'Capricórnio'],
+                mantra: '"Eu sinto, protejo e honro minhas raízes sagradas."'
+            },
+            {
+                id: 'leao',
+                name: 'Leão',
+                latinName: 'Leo',
+                symbol: '♌',
+                startMonth: 7, startDay: 23,
+                endMonth: 8, endDay: 22,
+                dates: '23 de Julho a 22 de Agosto',
+                element: 'Fogo',
+                elementIcon: '🔥',
+                elementColor: '#f77f00',
+                planet: 'Sol',
+                color: 'Dourado & Amarelo Ouro',
+                stone: 'Rubi & Olho de Tigre',
+                polarity: 'Masculina / Yang',
+                tagline: 'O Sol Radiante de Magnificência e Generosidade',
+                description: 'Leão é o rei do zodíaco, iluminado pela energia vibrante do Sol. Magnânimos, criativos e cheios de vitalidade, os leoninos espalham luz e calor por onde passam, inspirando outros através da sua confiança e nobreza de espírito.',
+                strengths: ['Generosidade e Nobreza de Coração', 'Confiança e Liderança Magnética', 'Criatividade e Expressão Artística', 'Lealdade Fervorosa'],
+                weaknesses: ['Orgulho e necessidade de reconhecimento', 'Centralização excessiva', 'Dificuldade com críticas'],
+                compatibility: ['Áries', 'Sagitário', 'Libra', 'Aquário'],
+                mantra: '"Eu irradio minha luz interior e ilumino o caminho."'
+            },
+            {
+                id: 'virgem',
+                name: 'Virgem',
+                latinName: 'Virgo',
+                symbol: '♍',
+                startMonth: 8, startDay: 23,
+                endMonth: 9, endDay: 22,
+                dates: '23 de Agosto a 22 de Setembro',
+                element: 'Terra',
+                elementIcon: '🌿',
+                elementColor: '#52b788',
+                planet: 'Mercúrio',
+                color: 'Azul-Marinho & Tons Terrosos',
+                stone: 'Safira & Jaspe Amarelo',
+                polarity: 'Feminina / Yin',
+                tagline: 'O Mestre da Perfeição, Análise e Serviço',
+                description: 'Virgem representa o discernimento, a precisão e a dedicação ao aprimoramento constante. Com uma mente analítica e um coração voltado ao serviço útil, virginianos transformam o caos em ordem e excelência.',
+                strengths: ['Mente Analítica e Atenção aos Detalhes', 'Dedicação ao Serviço e Eficiência', 'Praticidade e Organização', 'Humildade e Confiabilidade'],
+                weaknesses: ['Perfeccionismo autocritico', 'Preocupação excessiva com pequenos detalhes', 'Dificuldade em relaxar'],
+                compatibility: ['Touro', 'Capricórnio', 'Câncer', 'Peixes'],
+                mantra: '"Eu analiso, aprimoro e sirvo com excelência."'
+            },
+            {
+                id: 'libra',
+                name: 'Libra',
+                latinName: 'Libra',
+                symbol: '♎',
+                startMonth: 9, startDay: 23,
+                endMonth: 10, endDay: 22,
+                dates: '23 de Setembro a 22 de Outubro',
+                element: 'Ar',
+                elementIcon: '💨',
+                elementColor: '#ffacc7',
+                planet: 'Vênus',
+                color: 'Rosa Pastel & Azul Céu',
+                stone: 'Quartzo Rosa & Lápis-Lazúli',
+                polarity: 'Masculina / Yang',
+                tagline: 'O Buscador da Harmonia, Justiça e Beleza',
+                description: 'Libra é o diplomata do zodíaco, buscando incansavelmente o equilíbrio, a justiça e a beleza estética nas relações humanas. Regidos por Vênus, os librianos possuem gentileza ímpar, charme fascinante e vocação para a paz.',
+                strengths: ['Senso Nato de Justiça e Diplomacia', 'Encanto, Graça e Elegância', 'Capacidade de Ver Vários Pontos de Vista', 'Busca pela Harmonia'],
+                weaknesses: ['Indecisão ao ponderar muitas opções', 'Evitação de conflitos a qualquer custo', 'Dependência de aprovação'],
+                compatibility: ['Gêmeos', 'Aquário', 'Leão', 'Áries'],
+                mantra: '"Eu me equilibro e trago harmonia a todas as relações."'
+            },
+            {
+                id: 'escorpiao',
+                name: 'Escorpião',
+                latinName: 'Scorpio',
+                symbol: '♏',
+                startMonth: 10, startDay: 23,
+                endMonth: 11, endDay: 21,
+                dates: '23 de Outubro a 21 de Novembro',
+                element: 'Água',
+                elementIcon: '🌊',
+                elementColor: '#7209b7',
+                planet: 'Plutão & Marte',
+                color: 'Vinho, Preto & Escarlate',
+                stone: 'Granada & Topázio Imperial',
+                polarity: 'Feminina / Yin',
+                tagline: 'O Fênix da Transformação Profunda e Intuição',
+                description: 'Escorpião é o signo da metamorfose, do mistério e da intensidade emocional. Dotados de percepção aguçada e determinação feroz, os escorpianos enxergam além das superfícies e possuem o poder da cura e do renascimento.',
+                strengths: ['Intuição Penetrante e Foco Inabalável', 'Paixão e Profundidade Emocional', 'Resiliência e Poder de Renascimento', 'Lealdade Absoluta aos Seus'],
+                weaknesses: ['Desconfiança inicial e ciúme', 'Reservado e controlador', 'Dificuldade em perdoar mágoas'],
+                compatibility: ['Câncer', 'Peixes', 'Touro', 'Virgem'],
+                mantra: '"Eu me me transformo e renasço mais forte."'
+            },
+            {
+                id: 'sagitario',
+                name: 'Sagitário',
+                latinName: 'Sagittarius',
+                symbol: '♐',
+                startMonth: 11, startDay: 22,
+                endMonth: 12, endDay: 21,
+                dates: '22 de Novembro a 21 de Dezembro',
+                element: 'Fogo',
+                elementIcon: '🔥',
+                elementColor: '#9d4edd',
+                planet: 'Júpiter',
+                color: 'Púrpura & Violeta Profundo',
+                stone: 'Topázio Azul & Turquesa',
+                polarity: 'Masculina / Yang',
+                tagline: 'O Explorador Filosofo da Verdade e Liberdade',
+                description: 'Sagitário é a flecha disparada rumo ao infinito, buscando expansão de horizontes, sabedoria filosófica e aventuras enriquecedoras. Regidos por Júpiter, são os eternos otimistas do zodíaco.',
+                strengths: ['Otimismo Inabalável e Visão Ampla', 'Amor Incondicional à Liberdade', 'Honestidade e Filosofia de Vida', 'Entusiasmo por Aventuras'],
+                weaknesses: ['Franqueza excessiva sem filtro', 'Inquietação e impaciência com limitações', 'Excesso de otimismo'],
+                compatibility: ['Áries', 'Leão', 'Gêmeos', 'Aquário'],
+                mantra: '"Eu expando minha visão em busca da sabedoria superior."'
+            },
+            {
+                id: 'capricornio',
+                name: 'Capricórnio',
+                latinName: 'Capricorn',
+                symbol: '♑',
+                startMonth: 12, startDay: 22,
+                endMonth: 1, endDay: 19,
+                dates: '22 de Dezembro a 19 de Janeiro',
+                element: 'Terra',
+                elementIcon: '🌿',
+                elementColor: '#3a5a40',
+                planet: 'Saturno',
+                color: 'Cinza Grafite, Castanho & Preto',
+                stone: 'Ônix & Quartzo Fumê',
+                polarity: 'Feminina / Yin',
+                tagline: 'O Mestre da Disciplina, Ambição e Sabedoria',
+                description: 'Capricórnio é a escalada constante até o topo da montanha. Representa a responsabilidade, a maturidade e a maestria pessoal. Governados por Saturno, possuem ética impecável e resiliência incomparável.',
+                strengths: ['Disciplina Impecável e Ambição Elevada', 'Maturidade e Responsabilidade Séria', 'Resiliência e Persistência de Longo Prazo', 'Pragmatismo Confiável'],
+                weaknesses: ['Excesso de rigidez ou pessimismo', 'Dificuldade em demonstrar vulnerabilidade', 'Workaholic'],
+                compatibility: ['Touro', 'Virgem', 'Câncer', 'Escorpião'],
+                mantra: '"Eu me realizo com estrutura, propósito e honra."'
+            },
+            {
+                id: 'aquario',
+                name: 'Aquário',
+                latinName: 'Aquarius',
+                symbol: '♒',
+                startMonth: 1, startDay: 20,
+                endMonth: 2, endDay: 18,
+                dates: '20 de Janeiro a 18 de Fevereiro',
+                element: 'Ar',
+                elementIcon: '💨',
+                elementColor: '#00b4d8',
+                planet: 'Urano & Saturno',
+                color: 'Azul Elétrico & Turquesa',
+                stone: 'Ametista & Fluorita',
+                polarity: 'Masculina / Yang',
+                tagline: 'O Visionário Inovador e Humanitário',
+                description: 'Aquário olha para o futuro com originalidade e ideals humanitários. Quebradores de paradigmas por natureza, os aquarianos valorizam a liberdade de pensamento, a amizade autêntica e a revolução positiva.',
+                strengths: ['Visão Futurista e Originalidade Única', 'Espírito Humanitário e Fraterno', 'Independência Intelectual', 'Criatividade Fora da Caixa'],
+                weaknesses: ['Distanciamento emocional e teimosia de ideias', 'Rebeldia sem causa ocasional', 'Imprevisibilidade'],
+                compatibility: ['Gêmeos', 'Libra', 'Sagitário', 'Leão'],
+                mantra: '"Eu inovo e contribuo para o bem de toda a humanidade."'
+            },
+            {
+                id: 'peixes',
+                name: 'Peixes',
+                latinName: 'Pisces',
+                symbol: '♓',
+                startMonth: 2, startDay: 19,
+                endMonth: 3, endDay: 20,
+                dates: '19 de Fevereiro a 20 de Março',
+                element: 'Água',
+                elementIcon: '🌊',
+                elementColor: '#80ed99',
+                planet: 'Netuno & Júpiter',
+                color: 'Verde-Água & Lilás Místico',
+                stone: 'Água-Marinha & Ametista',
+                polarity: 'Feminina / Yin',
+                tagline: 'O Místico Compassivo e Sonhador',
+                description: 'Peixes é o encerramento do ciclo zodiacal, onde todas as almas se conectam na grande maré da compaixão e espiritualidade. Sensíveis, artísticos e intuitivos, os piscianos possuem empatia sem fronteiras.',
+                strengths: ['Compaixão Universal e Empatia Profunda', 'Imaginação Fantástica e Veia Artística', 'Sensibilidade Espiritual e Intuição', 'Adaptabilidade Doce'],
+                weaknesses: ['Tendência ao escapismo da realidade', 'Absorção excessiva da energia dos outros', 'Idealização exagerada'],
+                compatibility: ['Câncer', 'Escorpião', 'Virgem', 'Touro'],
+                mantra: '"Eu me conecto com o amor incondicional do universo."'
+            }
+        ];
+
+        // ================= ESTADO DA APLICAÇÃO =================
+        let currentInputMode = 'full'; // 'full' ou 'daymonth'
+        let currentSign = null;
+        let isAudioPlaying = false;
+        let audioContext = null;
+
+        // ================= INICIALIZAÇÃO DA PÁGINA =================
+        window.addEventListener('DOMContentLoaded', () => {
+            initStarfield();
+            populateDayOptions();
+            renderQuickButtons();
+
+            // Setar data máxima no input date para a data atual
+            const today = new Date();
+            const dateInput = document.getElementById('birth-date');
+            dateInput.max = today.toISOString().split('T')[0];
+        });
+
+        // Preencher o select de dias 1 a 31
+        function populateDayOptions() {
+            const daySelect = document.getElementById('birth-day');
+            daySelect.innerHTML = '';
+            for (let i = 1; i <= 31; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = i < 10 ? `0${i}` : i;
+                daySelect.appendChild(opt);
+            }
+        }
+
+        // Renderizar botões rápidos para consulta direta de signos
+        function renderQuickButtons() {
+            const container = document.getElementById('quick-sign-buttons');
+            container.innerHTML = ZODIAC_DATA.map(sign => `
+                <button type="button" onclick="displaySignResult('${sign.id}')" class="px-3 py-1.5 rounded-lg bg-mystic-900/60 hover:bg-mystic-700/80 border border-purple-800/40 text-purple-200 hover:text-mystic-accent text-xs transition-all flex items-center gap-1">
+                    <span>${sign.symbol}</span>
+                    <span>${sign.name}</span>
+                </button>
+            `).join('');
+        }
+
+        // Alternar modo de input (Data Completa vs Dia/Mês)
+        function switchInputMode(mode) {
+            currentInputMode = mode;
+            const containerFull = document.getElementById('input-container-full');
+            const containerDM = document.getElementById('input-container-daymonth');
+            const btnFull = document.getElementById('mode-btn-full');
+            const btnDM = document.getElementById('mode-btn-daymonth');
+            const birthDateInput = document.getElementById('birth-date');
+
+            if (mode === 'full') {
+                containerFull.classList.remove('hidden');
+                containerDM.classList.add('hidden');
+                containerDM.classList.remove('grid');
+                btnFull.className = 'flex-1 py-2 text-center text-sm font-semibold border-b-2 border-mystic-accent text-mystic-accent transition-all';
+                btnDM.className = 'flex-1 py-2 text-center text-sm font-semibold border-b-2 border-transparent text-purple-300/60 hover:text-purple-200 transition-all';
+                birthDateInput.required = true;
+            } else {
+                containerFull.classList.add('hidden');
+                containerDM.classList.remove('hidden');
+                containerDM.classList.add('grid');
+                btnDM.className = 'flex-1 py-2 text-center text-sm font-semibold border-b-2 border-mystic-accent text-mystic-accent transition-all';
+                btnFull.className = 'flex-1 py-2 text-center text-sm font-semibold border-b-2 border-transparent text-purple-300/60 hover:text-purple-200 transition-all';
+                birthDateInput.required = false;
+            }
+            hideError();
+        }
+
+        // ================= CÁLCULO DE SIGNO =================
+        function getZodiacSign(day, month) {
+            return ZODIAC_DATA.find(sign => {
+                if (sign.startMonth === month && day >= sign.startDay) return true;
+                if (sign.endMonth === month && day <= sign.endDay) return true;
+                return false;
+            });
+        }
+
+        // Tratar envio do formulário
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            hideError();
+
+            let day, month;
+
+            if (currentInputMode === 'full') {
+                const dateVal = document.getElementById('birth-date').value;
+                if (!dateVal) {
+                    showError('Por favor, escolha uma data de nascimento.');
+                    return;
+                }
+                const parts = dateVal.split('-'); // YYYY-MM-DD
+                month = parseInt(parts[1], 10);
+                day = parseInt(parts[2], 10);
+            } else {
+                day = parseInt(document.getElementById('birth-day').value, 10);
+                month = parseInt(document.getElementById('birth-month').value, 10);
+            }
+
+            // Validação de dias válidos no mês (ex: 31 de Fev)
+            if (!isValidDate(day, month)) {
+                showError('Data inválida para o mês selecionado.');
+                return;
+            }
+
+            const sign = getZodiacSign(day, month);
+            if (sign) {
+                playCosmicSound();
+                displaySignResult(sign.id);
+            } else {
+                showError('Não foi possível calcular o signo para a data informada.');
+            }
+        }
+
+        function isValidDate(day, month) {
+            const daysInMonth = [0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            return day <= daysInMonth[month];
+        }
+
+        function showError(msg) {
+            const errorDiv = document.getElementById('form-error');
+            errorDiv.textContent = msg;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('form-error').classList.add('hidden');
+        }
+
+        // ================= RENDERIZAR RESULTADO DO SIGNO =================
+        function displaySignResult(signId) {
+            const sign = ZODIAC_DATA.find(s => s.id === signId);
+            if (!sign) return;
+
+            currentSign = sign;
+
+            // Preencher campos
+            document.getElementById('res-sign-name').textContent = sign.name.toUpperCase();
+            document.getElementById('res-tagline').textContent = `"${sign.tagline}"`;
+            document.getElementById('res-symbol-glyph').textContent = sign.symbol;
+            document.getElementById('res-constellation-name').textContent = sign.latinName;
+            document.getElementById('res-dates').textContent = sign.dates;
+            document.getElementById('res-element-icon').textContent = sign.elementIcon;
+            document.getElementById('res-element-name').textContent = `Elemento ${sign.element}`;
+
+            document.getElementById('res-planet').textContent = sign.planet;
+            document.getElementById('res-color').textContent = sign.color;
+            document.getElementById('res-stone').textContent = sign.stone;
+            document.getElementById('res-polarity').textContent = sign.polarity;
+
+            document.getElementById('res-description').textContent = sign.description;
+            document.getElementById('res-mantra').textContent = sign.mantra;
+
+            // Glow dinâmico com a cor do elemento
+            document.getElementById('element-glow').style.backgroundColor = sign.elementColor;
+
+            // Virtudes
+            const strengthsList = document.getElementById('res-strengths');
+            strengthsList.innerHTML = sign.strengths.map(s => `
+                <li class="flex items-start gap-2">
+                    <span class="text-emerald-400 mt-0.5">✦</span>
+                    <span>${s}</span>
+                </li>
+            `).join('');
+
+            // Desafios
+            const weaknessesList = document.getElementById('res-weaknesses');
+            weaknessesList.innerHTML = sign.weaknesses.map(w => `
+                <li class="flex items-start gap-2">
+                    <span class="text-amber-400 mt-0.5">❖</span>
+                    <span>${w}</span>
+                </li>
+            `).join('');
+
+            // Compatibilidade
+            const compatDiv = document.getElementById('res-compatibility');
+            compatDiv.innerHTML = sign.compatibility.map(c => `
+                <span class="px-3 py-1 rounded-full bg-purple-900/50 border border-purple-500/30 text-purple-200 text-xs font-semibold">
+                    ${c}
+                </span>
+            `).join('');
+
+            // Resetar botão de cópia
+            document.getElementById('copy-btn-text').textContent = 'Copiar Resumo Astral';
+
+            // Transição de telas
+            const formSec = document.getElementById('form-section');
+            const resultSec = document.getElementById('result-section');
+
+            formSec.classList.remove('page-visible');
+            formSec.classList.add('page-hidden');
+
+            setTimeout(() => {
+                resultSec.classList.remove('page-hidden');
+                resultSec.classList.add('page-visible');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 300);
+        }
+
+        function goToHome() {
+            const formSec = document.getElementById('form-section');
+            const resultSec = document.getElementById('result-section');
+
+            resultSec.classList.remove('page-visible');
+            resultSec.classList.add('page-hidden');
+
+            setTimeout(() => {
+                formSec.classList.remove('page-hidden');
+                formSec.classList.add('page-visible');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 300);
+        }
+
+        // ================= COPIAR RESUMO =================
+        function copyZodiacSummary() {
+            if (!currentSign) return;
+
+            const textToCopy = `✨ Descobri meu signo no Oráculo Zodiacal ✨\n\n` +
+                `🔮 Signo: ${currentSign.name} (${currentSign.symbol})\n` +
+                `📅 Período: ${currentSign.dates}\n` +
+                `🌟 Elemento: ${currentSign.element} ${currentSign.elementIcon}\n` +
+                `🪐 Planeta Regente: ${currentSign.planet}\n` +
+                `💎 Pedra da Sorte: ${currentSign.stone}\n` +
+                `📜 Mantra: ${currentSign.mantra}\n\n` +
+                `Descubra o seu signo também!`;
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(textToCopy);
+            } else {
+                // Fallback para iframe ou contextos restritos
+                const textarea = document.createElement('textarea');
+                textarea.value = textToCopy;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+
+            const btnText = document.getElementById('copy-btn-text');
+            btnText.textContent = '✓ Copiado com Sucesso!';
+            setTimeout(() => {
+                btnText.textContent = 'Copiar Resumo Astral';
+            }, 3000);
+        }
+
+        // ================= EFEITO SONORO COSMICO (Web Audio API) =================
+        function toggleAudio() {
+            isAudioPlaying = !isAudioPlaying;
+            const iconOff = document.getElementById('audio-icon-off');
+            const iconOn = document.getElementById('audio-icon-on');
+            const statusText = document.getElementById('audio-status-text');
+
+            if (isAudioPlaying) {
+                iconOff.classList.add('hidden');
+                iconOn.classList.remove('hidden');
+                statusText.textContent = 'Som Cosmic: On';
+                playCosmicSound();
+            } else {
+                iconOn.classList.add('hidden');
+                iconOff.classList.remove('hidden');
+                statusText.textContent = 'Som Cosmic: Off';
+            }
+        }
+
+        function playCosmicSound() {
+            if (!isAudioPlaying) return;
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+
+                const now = audioContext.currentTime;
+
+                // Arpejo celestial suave
+                const freqs = [440, 554.37, 659.25, 880, 1108.73];
+                freqs.forEach((freq, index) => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + index * 0.1);
+
+                    gain.gain.setValueAtTime(0, now + index * 0.1);
+                    gain.gain.linearRampToValueAtTime(0.08, now + index * 0.1 + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.1 + 1.5);
+
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+
+                    osc.start(now + index * 0.1);
+                    osc.stop(now + index * 0.1 + 1.6);
+                });
+            } catch (e) {
+                console.log('Audio Context error', e);
+            }
+        }
+
+        // ================= CANVAS STARFIELD ANIMADO =================
+        function initStarfield() {
+            const canvas = document.getElementById('starfield');
+            const ctx = canvas.getContext('2d');
+            let stars = [];
+            let width, height;
+
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+                createStars();
+            }
+
+            function createStars() {
+                stars = [];
+                const count = Math.floor((width * height) / 3000);
+                for (let i = 0; i < count; i++) {
+                    stars.push({
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        radius: Math.random() * 1.5 + 0.3,
+                        alpha: Math.random(),
+                        speed: Math.random() * 0.01 + 0.003,
+                        color: Math.random() > 0.8 ? '#d4af37' : (Math.random() > 0.5 ? '#9d4edd' : '#ffffff')
+                    });
+                }
+            }
+
+            function render() {
+                ctx.clearRect(0, 0, width, height);
+
+                stars.forEach(star => {
+                    star.alpha += star.speed;
+                    if (star.alpha > 1 || star.alpha < 0.1) {
+                        star.speed = -star.speed;
+                    }
+
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = star.color;
+                    ctx.globalAlpha = Math.max(0, Math.min(1, star.alpha));
+                    ctx.shadowBlur = star.radius * 3;
+                    ctx.shadowColor = star.color;
+                    ctx.fill();
+                });
+
+                requestAnimationFrame(render);
+            }
+
+            window.addEventListener('resize', resize);
+            resize();
+            render();
+        }
+    </script>
+</body>
+
+</html>
